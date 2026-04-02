@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="google-site-verification" content="F_Q_EfotylnMCZ7uCxkJNAzmDGhbTfv4Kp51AKxRsgc" />
 <title>Conveyor Motor Power Calculator - Free Engineering Tool</title>
-<meta name="description" content="Free online conveyor motor power calculator. Calculate required motor power from load, belt speed, and efficiency instantly.">
+<meta name="description" content="Free conveyor motor power calculator. Calculate from load (kg) or capacity (TPH) with material density. Includes recommended motor size.">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: system-ui, sans-serif; background: #f5f5f5; color: #222; min-height: 100vh; display: flex; flex-direction: column; }
@@ -15,32 +15,50 @@
   nav { background: #16213e; padding: 10px 24px; display: flex; gap: 16px; }
   nav a { color: #aaa; text-decoration: none; font-size: 13px; }
   nav a:hover { color: white; }
-  main { flex: 1; max-width: 560px; margin: 40px auto; padding: 0 20px; width: 100%; }
+  main { flex: 1; max-width: 580px; margin: 40px auto; padding: 0 20px; width: 100%; }
   .card { background: white; border-radius: 12px; padding: 28px; border: 1px solid #e0e0e0; }
   h2 { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
-  .subtitle { font-size: 14px; color: #666; margin-bottom: 24px; }
+  .subtitle { font-size: 14px; color: #666; margin-bottom: 20px; }
+
+  .mode-toggle { display: flex; background: #f3f4f6; border-radius: 8px; padding: 4px; margin-bottom: 24px; }
+  .mode-btn { flex: 1; padding: 8px; border: none; background: transparent; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; color: #666; transition: all 0.2s; }
+  .mode-btn.active { background: white; color: #4f46e5; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
   label { display: block; font-size: 13px; color: #555; margin-bottom: 6px; }
   input[type=number], select { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; margin-bottom: 16px; outline: none; transition: border 0.2s; background: white; }
   input[type=number]:focus, select:focus { border-color: #4f46e5; }
-  button { width: 100%; background: #4f46e5; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
-  button:hover { background: #4338ca; }
+  input:disabled { background: #f9fafb; color: #999; }
+
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  button.calc-btn { width: 100%; background: #4f46e5; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; transition: background 0.2s; margin-top: 4px; }
+  button.calc-btn:hover { background: #4338ca; }
+
   .results { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
   .result-box { background: #f8f7ff; border: 1px solid #e0dcff; border-radius: 8px; padding: 14px; }
+  .result-box.highlight { background: #eef2ff; border-color: #c7d2fe; }
   .result-label { font-size: 12px; color: #6b7280; margin-bottom: 4px; }
   .result-value { font-size: 24px; font-weight: 600; color: #4f46e5; }
+  .result-value.big { font-size: 28px; }
   .result-unit { font-size: 12px; color: #888; }
-  .formula { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; margin-top: 16px; font-size: 13px; color: #555; line-height: 1.6; }
+
+  .formula { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; margin-top: 16px; font-size: 13px; color: #555; line-height: 1.8; }
   .formula strong { color: #333; }
+
+  .divider { border: none; border-top: 1px solid #f0f0f0; margin: 20px 0; }
+
   .other-tools { margin-top: 16px; }
   .other-tools p { font-size: 13px; color: #666; margin-bottom: 8px; }
   .tool-link { display: inline-block; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 6px; padding: 6px 12px; font-size: 13px; color: #4f46e5; text-decoration: none; margin-right: 8px; }
   .tool-link:hover { background: #e8e9ff; }
+
   .cta { background: #fff8f0; border: 1px solid #fed7aa; border-radius: 10px; padding: 18px; margin-top: 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   .cta-text { font-size: 13px; color: #555; }
   .cta-text strong { color: #c2410c; display: block; margin-bottom: 2px; font-size: 14px; }
   .cta-btn { background: #ea580c; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; text-decoration: none; display: inline-block; }
   .cta-btn:hover { background: #c2410c; }
   footer { text-align: center; padding: 20px; font-size: 12px; color: #999; }
+  .hidden { display: none; }
 </style>
 </head>
 <body>
@@ -58,58 +76,121 @@
 <main>
   <div class="card">
     <h2>Motor Power Calculator</h2>
-    <p class="subtitle">Calculate required motor power for your conveyor system</p>
+    <p class="subtitle">Calculate required motor power — choose input method below</p>
 
-    <label>Total Load on Belt (kg)</label>
-    <input type="number" id="load" value="500" min="1">
+    <div class="mode-toggle">
+      <button class="mode-btn active" onclick="setMode('load')">Load (kg)</button>
+      <button class="mode-btn" onclick="setMode('tph')">Capacity (TPH)</button>
+    </div>
 
-    <label>Belt Speed (m/s)</label>
-    <input type="number" id="speed" value="1.5" min="0.1" step="0.1">
+    <!-- Mode 1: Load (kg) -->
+    <div id="mode-load">
+      <label>Total Load on Belt (kg)</label>
+      <input type="number" id="load" value="500" min="1">
 
-    <label>Conveyor Incline Angle (degrees)</label>
-    <input type="number" id="angle" value="0" min="0" max="90">
+      <div class="row">
+        <div>
+          <label>Belt Speed (m/s)</label>
+          <input type="number" id="speed-load" value="1.5" min="0.1" step="0.1">
+        </div>
+        <div>
+          <label>Incline Angle (degrees)</label>
+          <input type="number" id="angle-load" value="0" min="0" max="90">
+        </div>
+      </div>
 
-    <label>Drive Efficiency (%)</label>
-    <select id="efficiency">
-      <option value="0.95">95% — Direct drive</option>
-      <option value="0.90" selected>90% — Gearbox drive</option>
-      <option value="0.85">85% — Chain drive</option>
-      <option value="0.80">80% — Belt drive</option>
-    </select>
+      <label>Drive Efficiency</label>
+      <select id="eff-load">
+        <option value="0.95">95% — Direct drive</option>
+        <option value="0.90" selected>90% — Gearbox drive</option>
+        <option value="0.85">85% — Chain drive</option>
+        <option value="0.80">80% — Belt drive</option>
+      </select>
+    </div>
 
-    <button onclick="calculate()">Calculate Motor Power</button>
+    <!-- Mode 2: TPH -->
+    <div id="mode-tph" class="hidden">
+      <label>Material Type</label>
+      <select id="material" onchange="onMaterialChange()">
+        <option value="800">Coal — 800 kg/m³</option>
+        <option value="580">Rice — 580 kg/m³</option>
+        <option value="1200">Cement — 1,200 kg/m³</option>
+        <option value="1400">Soil — 1,400 kg/m³</option>
+        <option value="1500">Sand — 1,500 kg/m³</option>
+        <option value="1600">Limestone — 1,600 kg/m³</option>
+        <option value="1700">Gravel — 1,700 kg/m³</option>
+        <option value="2700">Iron Ore — 2,700 kg/m³</option>
+        <option value="custom">Custom density...</option>
+      </select>
+
+      <div id="custom-density-box" class="hidden">
+        <label>Custom Density (kg/m³)</label>
+        <input type="number" id="custom-density" value="1000" min="1">
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Capacity (TPH)</label>
+          <input type="number" id="tph" value="100" min="1">
+        </div>
+        <div>
+          <label>Belt Speed (m/s)</label>
+          <input type="number" id="speed-tph" value="1.5" min="0.1" step="0.1">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Belt Length (m)</label>
+          <input type="number" id="length" value="50" min="1">
+        </div>
+        <div>
+          <label>Lift Height (m)</label>
+          <input type="number" id="lift-height" value="0" min="0">
+        </div>
+      </div>
+
+      <label>Drive Efficiency</label>
+      <select id="eff-tph">
+        <option value="0.95">95% — Direct drive</option>
+        <option value="0.90" selected>90% — Gearbox drive</option>
+        <option value="0.85">85% — Chain drive</option>
+        <option value="0.80">80% — Belt drive</option>
+      </select>
+    </div>
+
+    <button class="calc-btn" onclick="calculate()">Calculate Motor Power</button>
 
     <div class="results">
       <div class="result-box">
         <div class="result-label">Required Power</div>
-        <div class="result-value" id="kw">-</div>
+        <div class="result-value" id="res-kw">—</div>
         <div class="result-unit">kilowatts (kW)</div>
       </div>
       <div class="result-box">
         <div class="result-label">Required Power</div>
-        <div class="result-value" id="hp">-</div>
+        <div class="result-value" id="res-hp">—</div>
         <div class="result-unit">horsepower (HP)</div>
       </div>
-    </div>
-
-    <div class="results" style="margin-top: 12px;">
-      <div class="result-box">
-        <div class="result-label">Recommended Motor</div>
-        <div class="result-value" id="recommended" style="font-size: 18px;">-</div>
+      <div class="result-box highlight">
+        <div class="result-label">Recommended Motor Size</div>
+        <div class="result-value big" id="res-motor">—</div>
         <div class="result-unit">kW (next standard size)</div>
       </div>
       <div class="result-box">
-        <div class="result-label">Lift Force</div>
-        <div class="result-value" id="lift">-</div>
-        <div class="result-unit">newtons (N)</div>
+        <div class="result-label">Load on Belt</div>
+        <div class="result-value" id="res-load">—</div>
+        <div class="result-unit">kg (total)</div>
       </div>
     </div>
 
-    <div class="formula">
-      <strong>Formula:</strong><br>
-      Power (W) = (Load × g × Speed × sin(angle) + Friction) ÷ Efficiency<br>
-      Friction factor = 0.05 (standard conveyor)
+    <div class="formula" id="formula-box">
+      <strong>Formula (Load mode):</strong><br>
+      Power = (Load × g × Speed × sin(angle) + Friction) ÷ Efficiency<br>
+      Friction factor = 0.05
     </div>
+
+    <hr class="divider">
 
     <div class="other-tools">
       <p>Other calculators:</p>
@@ -131,36 +212,80 @@
 </footer>
 
 <script>
-function calculate() {
-  var load = parseFloat(document.getElementById('load').value);
-  var speed = parseFloat(document.getElementById('speed').value);
-  var angle = parseFloat(document.getElementById('angle').value);
-  var eff = parseFloat(document.getElementById('efficiency').value);
+var currentMode = 'load';
+var standardSizes = [0.37,0.55,0.75,1.1,1.5,2.2,3,4,5.5,7.5,11,15,18.5,22,30,37,45,55,75,90,110];
 
-  if (!load || !speed || load <= 0 || speed <= 0) {
-    alert('Please enter valid values.');
-    return;
-  }
-
-  var g = 9.81;
-  var angleRad = angle * Math.PI / 180;
-  var liftForce = load * g * Math.sin(angleRad);
-  var frictionForce = load * g * Math.cos(angleRad) * 0.05;
-  var totalForce = liftForce + frictionForce;
-  var powerW = (totalForce * speed) / eff;
-  var powerKW = powerW / 1000;
-  var powerHP = powerKW * 1.341;
-
-  var standardSizes = [0.37, 0.55, 0.75, 1.1, 1.5, 2.2, 3, 4, 5.5, 7.5, 11, 15, 18.5, 22, 30, 37, 45, 55, 75, 90, 110];
-  var recommended = standardSizes.find(function(s) { return s >= powerKW * 1.2; }) || powerKW * 1.2;
-
-  document.getElementById('kw').textContent = powerKW.toFixed(2);
-  document.getElementById('hp').textContent = powerHP.toFixed(2);
-  document.getElementById('recommended').textContent = recommended.toFixed(2);
-  document.getElementById('lift').textContent = Math.round(liftForce);
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('mode-load').classList.toggle('hidden', mode !== 'load');
+  document.getElementById('mode-tph').classList.toggle('hidden', mode !== 'tph');
+  document.querySelectorAll('.mode-btn').forEach(function(b, i) {
+    b.classList.toggle('active', (i === 0 && mode === 'load') || (i === 1 && mode === 'tph'));
+  });
+  document.getElementById('res-kw').textContent = '—';
+  document.getElementById('res-hp').textContent = '—';
+  document.getElementById('res-motor').textContent = '—';
+  document.getElementById('res-load').textContent = '—';
 }
 
-calculate();
+function onMaterialChange() {
+  var val = document.getElementById('material').value;
+  document.getElementById('custom-density-box').classList.toggle('hidden', val !== 'custom');
+}
+
+function getRecommended(kw) {
+  var needed = kw * 1.2;
+  return standardSizes.find(function(s) { return s >= needed; }) || parseFloat((needed).toFixed(1));
+}
+
+function calculate() {
+  var powerKW, loadKG;
+
+  if (currentMode === 'load') {
+    var load = parseFloat(document.getElementById('load').value);
+    var speed = parseFloat(document.getElementById('speed-load').value);
+    var angle = parseFloat(document.getElementById('angle-load').value) || 0;
+    var eff = parseFloat(document.getElementById('eff-load').value);
+    if (!load || !speed || load <= 0 || speed <= 0) { alert('Please enter valid values.'); return; }
+    var rad = angle * Math.PI / 180;
+    var lift = load * 9.81 * Math.sin(rad);
+    var friction = load * 9.81 * Math.cos(rad) * 0.05;
+    powerKW = ((lift + friction) * speed) / eff / 1000;
+    loadKG = load;
+    document.getElementById('formula-box').innerHTML = '<strong>Formula (Load mode):</strong><br>Power = (Load × g × (sin(angle) + 0.05 × cos(angle)) × Speed) ÷ Efficiency';
+
+  } else {
+    var tph = parseFloat(document.getElementById('tph').value);
+    var speedT = parseFloat(document.getElementById('speed-tph').value);
+    var length = parseFloat(document.getElementById('length').value);
+    var liftH = parseFloat(document.getElementById('lift-height').value) || 0;
+    var effT = parseFloat(document.getElementById('eff-tph').value);
+    var matVal = document.getElementById('material').value;
+    var density = matVal === 'custom'
+      ? parseFloat(document.getElementById('custom-density').value)
+      : parseFloat(matVal);
+    if (!tph || !speedT || !length || !density) { alert('Please enter valid values.'); return; }
+    var kgPerSec = (tph * 1000) / 3600;
+    loadKG = kgPerSec * (length / speedT);
+    var liftPower = kgPerSec * 9.81 * liftH;
+    var frictionPower = loadKG * 9.81 * 0.05 * speedT;
+    powerKW = (liftPower + frictionPower) / effT / 1000;
+    document.getElementById('formula-box').innerHTML =
+      '<strong>Formula (TPH mode):</strong><br>' +
+      'Load (kg/s) = TPH × 1000 ÷ 3600<br>' +
+      'Lift Power = Load/s × g × Lift Height<br>' +
+      'Friction Power = Total Load × g × 0.05 × Speed<br>' +
+      'Total Power = (Lift + Friction) ÷ Efficiency';
+  }
+
+  var powerHP = powerKW * 1.341;
+  var recommended = getRecommended(powerKW);
+
+  document.getElementById('res-kw').textContent = powerKW.toFixed(2);
+  document.getElementById('res-hp').textContent = powerHP.toFixed(2);
+  document.getElementById('res-motor').textContent = recommended % 1 === 0 ? recommended.toFixed(0) : recommended.toFixed(2);
+  document.getElementById('res-load').textContent = Math.round(loadKG).toLocaleString();
+}
 </script>
 </body>
 </html>
