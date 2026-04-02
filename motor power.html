@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="google-site-verification" content="F_Q_EfotylnMCZ7uCxkJNAzmDGhbTfv4Kp51AKxRsgc" />
+<title>Conveyor Motor Power Calculator - Free Engineering Tool</title>
+<meta name="description" content="Free online conveyor motor power calculator. Calculate required motor power from load, belt speed, and efficiency instantly.">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: system-ui, sans-serif; background: #f5f5f5; color: #222; min-height: 100vh; display: flex; flex-direction: column; }
+  header { background: #1a1a2e; color: white; padding: 16px 24px; }
+  header h1 { font-size: 18px; font-weight: 500; }
+  header p { font-size: 13px; color: #aaa; margin-top: 2px; }
+  nav { background: #16213e; padding: 10px 24px; display: flex; gap: 16px; }
+  nav a { color: #aaa; text-decoration: none; font-size: 13px; }
+  nav a:hover { color: white; }
+  main { flex: 1; max-width: 560px; margin: 40px auto; padding: 0 20px; width: 100%; }
+  .card { background: white; border-radius: 12px; padding: 28px; border: 1px solid #e0e0e0; }
+  h2 { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+  .subtitle { font-size: 14px; color: #666; margin-bottom: 24px; }
+  label { display: block; font-size: 13px; color: #555; margin-bottom: 6px; }
+  input[type=number], select { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; margin-bottom: 16px; outline: none; transition: border 0.2s; background: white; }
+  input[type=number]:focus, select:focus { border-color: #4f46e5; }
+  button { width: 100%; background: #4f46e5; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+  button:hover { background: #4338ca; }
+  .results { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+  .result-box { background: #f8f7ff; border: 1px solid #e0dcff; border-radius: 8px; padding: 14px; }
+  .result-label { font-size: 12px; color: #6b7280; margin-bottom: 4px; }
+  .result-value { font-size: 24px; font-weight: 600; color: #4f46e5; }
+  .result-unit { font-size: 12px; color: #888; }
+  .formula { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; margin-top: 16px; font-size: 13px; color: #555; line-height: 1.6; }
+  .formula strong { color: #333; }
+  .other-tools { margin-top: 16px; }
+  .other-tools p { font-size: 13px; color: #666; margin-bottom: 8px; }
+  .tool-link { display: inline-block; background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 6px; padding: 6px 12px; font-size: 13px; color: #4f46e5; text-decoration: none; margin-right: 8px; }
+  .tool-link:hover { background: #e8e9ff; }
+  .cta { background: #fff8f0; border: 1px solid #fed7aa; border-radius: 10px; padding: 18px; margin-top: 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .cta-text { font-size: 13px; color: #555; }
+  .cta-text strong { color: #c2410c; display: block; margin-bottom: 2px; font-size: 14px; }
+  .cta-btn { background: #ea580c; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; text-decoration: none; display: inline-block; }
+  .cta-btn:hover { background: #c2410c; }
+  footer { text-align: center; padding: 20px; font-size: 12px; color: #999; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Conveyor Tools</h1>
+  <p>Free Engineering Calculators for Conveyor Systems</p>
+</header>
+
+<nav>
+  <a href="/index.html">Belt Speed</a>
+  <a href="/motor-power.html">Motor Power</a>
+</nav>
+
+<main>
+  <div class="card">
+    <h2>Motor Power Calculator</h2>
+    <p class="subtitle">Calculate required motor power for your conveyor system</p>
+
+    <label>Total Load on Belt (kg)</label>
+    <input type="number" id="load" value="500" min="1">
+
+    <label>Belt Speed (m/s)</label>
+    <input type="number" id="speed" value="1.5" min="0.1" step="0.1">
+
+    <label>Conveyor Incline Angle (degrees)</label>
+    <input type="number" id="angle" value="0" min="0" max="90">
+
+    <label>Drive Efficiency (%)</label>
+    <select id="efficiency">
+      <option value="0.95">95% — Direct drive</option>
+      <option value="0.90" selected>90% — Gearbox drive</option>
+      <option value="0.85">85% — Chain drive</option>
+      <option value="0.80">80% — Belt drive</option>
+    </select>
+
+    <button onclick="calculate()">Calculate Motor Power</button>
+
+    <div class="results">
+      <div class="result-box">
+        <div class="result-label">Required Power</div>
+        <div class="result-value" id="kw">-</div>
+        <div class="result-unit">kilowatts (kW)</div>
+      </div>
+      <div class="result-box">
+        <div class="result-label">Required Power</div>
+        <div class="result-value" id="hp">-</div>
+        <div class="result-unit">horsepower (HP)</div>
+      </div>
+    </div>
+
+    <div class="results" style="margin-top: 12px;">
+      <div class="result-box">
+        <div class="result-label">Recommended Motor</div>
+        <div class="result-value" id="recommended" style="font-size: 18px;">-</div>
+        <div class="result-unit">kW (next standard size)</div>
+      </div>
+      <div class="result-box">
+        <div class="result-label">Lift Force</div>
+        <div class="result-value" id="lift">-</div>
+        <div class="result-unit">newtons (N)</div>
+      </div>
+    </div>
+
+    <div class="formula">
+      <strong>Formula:</strong><br>
+      Power (W) = (Load × g × Speed × sin(angle) + Friction) ÷ Efficiency<br>
+      Friction factor = 0.05 (standard conveyor)
+    </div>
+
+    <div class="other-tools">
+      <p>Other calculators:</p>
+      <a class="tool-link" href="/index.html">Belt Speed</a>
+    </div>
+  </div>
+
+  <div class="cta">
+    <div class="cta-text">
+      <strong>Need a custom conveyor system design?</strong>
+      Get professional 3D modeling and engineering drawings from a specialist.
+    </div>
+    <a class="cta-btn" href="mailto:piboonsit.p@kkumail.com">Contact Us</a>
+  </div>
+</main>
+
+<footer>
+  © 2025 Conveyor Tools · Free engineering calculators
+</footer>
+
+<script>
+function calculate() {
+  var load = parseFloat(document.getElementById('load').value);
+  var speed = parseFloat(document.getElementById('speed').value);
+  var angle = parseFloat(document.getElementById('angle').value);
+  var eff = parseFloat(document.getElementById('efficiency').value);
+
+  if (!load || !speed || load <= 0 || speed <= 0) {
+    alert('Please enter valid values.');
+    return;
+  }
+
+  var g = 9.81;
+  var angleRad = angle * Math.PI / 180;
+  var liftForce = load * g * Math.sin(angleRad);
+  var frictionForce = load * g * Math.cos(angleRad) * 0.05;
+  var totalForce = liftForce + frictionForce;
+  var powerW = (totalForce * speed) / eff;
+  var powerKW = powerW / 1000;
+  var powerHP = powerKW * 1.341;
+
+  var standardSizes = [0.37, 0.55, 0.75, 1.1, 1.5, 2.2, 3, 4, 5.5, 7.5, 11, 15, 18.5, 22, 30, 37, 45, 55, 75, 90, 110];
+  var recommended = standardSizes.find(function(s) { return s >= powerKW * 1.2; }) || powerKW * 1.2;
+
+  document.getElementById('kw').textContent = powerKW.toFixed(2);
+  document.getElementById('hp').textContent = powerHP.toFixed(2);
+  document.getElementById('recommended').textContent = recommended.toFixed(2);
+  document.getElementById('lift').textContent = Math.round(liftForce);
+}
+
+calculate();
+</script>
+</body>
+</html>
